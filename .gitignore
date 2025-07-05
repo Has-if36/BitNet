@@ -48,4 +48,5 @@ build cpu/
 build cpu x86/
 build cpu arm/
 build gpu/
+build gpu Vulkan/
 logs/
