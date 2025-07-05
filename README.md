@@ -337,17 +337,19 @@ Import-Module "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common
 
 These steps will initialize your environment and allow you to use the correct Visual Studio tools.
 
-### Fixing Immediate Issue 🛠 
+## Fixes/Workarounds 🛠
+
+### Fixing Immediate Issue
 
 #### Missing Headers
 
 - chrono
-    - common.cpp
-    - log.cpp
-    - imatrix.cpp
-    - perplexity.cpp
+    - common/common.cpp
+    - common/log.cpp
+    - example//imatrix.cpp      (if build with example)
+    - example//perplexity.cpp   (if build with example)
 
-### Fixing Build Issue 🛠
+### Fixing Build Issue
 
 #### Build Generator
 
@@ -355,7 +357,36 @@ In setup_env.py, Since these options are required ("-T ClangCL" for Windows)
 ```
 -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 ```
-Some generator does not do well during configuration (for my case, Visual Studio 17 2022 because ClangCL does not complement well with C and CXX Compiler. And also the need of use for gcc for this build). So use something like NMake Makefiles (Closest to VS) or Ninja
+Some generator does not do well during configuration (for my case, `Visual Studio 17 2022` because ClangCL does not complement well with C and CXX Compiler. And also the need of use for gcc for this build). So use something like `NMake Makefiles` (Closest to VS) or `Ninja`
 ```
 cmake -B build -G "Ninja" -DBITNET_X86_TL2=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+```
+
+#### Build for GPU
+
+For this one, I did for Vulkan, following based on their [Doc](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md#vulkan). The important ones are installing [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) and this argument. And since they are using either `MinGW` and `MSYS`, might as well use them.
+```
+-DGGML_VULKAN=ON
+```
+There are some changes need to be done (otherwise it will crash/abort when running with GPU) with shady workaround.
+```
+GGML_ASSERT(view_src == NULL || data_size == 0 || data_size + view_offs <= ggml_nbytes(view_src));
+```
+Replace with
+```
+#if defined(GGML_USE_BLAS) || defined(GGML_USE_CUDA) || defined(GGML_USE_VULKAN) || defined(GGML_USE_SYCL)
+    if (view_src != NULL && data_size > 0) {
+        size_t s_vs = ggml_nbytes(view_src);
+        if (data_size + view_offs > s_vs) {
+            // Clamp to available size
+            data_size = s_vs > view_offs ? s_vs - view_offs : 0;
+        }
+    }
+#else
+    GGML_ASSERT(view_src == NULL || data_size == 0 || data_size + view_offs <= ggml_nbytes(view_src));
+#endif
+```
+This will pretty much clamp the required allocation down to what's available instead of crashing. So far I've only tested with `bitnet-b1.58-2B-4T`, it's slower than CPU (at least from what I see, not sure why. It might be because of this, who knows. According to ChatGPT, it might be because of the overhead in transfering data between CPU to GPU, so larger model is suitable). `-ngl` will enable gpu support, if set 0, CPU will be used.
+```
+"./build/bin/llama-cli.exe" -m models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf -p "You are a helpful assistant" -cnv -ngl 31 -t 4
 ```
