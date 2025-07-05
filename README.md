@@ -362,9 +362,9 @@ Some generator does not do well during configuration (for my case, `Visual Studi
 cmake -B build -G "Ninja" -DBITNET_X86_TL2=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 ```
 
-#### Build for GPU
+#### Build for GPU Support (Vulkan)
 
-For this one, I did for Vulkan, following based on their [Doc](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md#vulkan). The important ones are installing [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) and this argument. And since they are using either `MinGW` and `MSYS`, might as well use them.
+Following on their [Doc](https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md#vulkan). The important ones are installing [Vulkan SDK](https://vulkan.lunarg.com/sdk/home#windows) and this argument. And since they are using either `MinGW` and `MSYS`, might as well use them.
 ```
 -DGGML_VULKAN=ON
 ```
