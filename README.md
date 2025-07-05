@@ -336,3 +336,26 @@ Import-Module "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common
 ```
 
 These steps will initialize your environment and allow you to use the correct Visual Studio tools.
+
+### Fixing Immediate Issue 🛠 
+
+#### Missing Headers
+
+- chrono
+    - common.cpp
+    - log.cpp
+    - imatrix.cpp
+    - perplexity.cpp
+
+### Fixing Build Issue 🛠
+
+#### Build Generator
+
+In setup_env.py, Since these options are required ("-T ClangCL" for Windows)
+```
+-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+```
+Some generator does not do well during configuration (for my case, Visual Studio 17 2022 because ClangCL does not complement well with C and CXX Compiler. And also the need of use for gcc for this build). So use something like NMake Makefiles (Closest to VS) or Ninja
+```
+cmake -B build -G "Ninja" -DBITNET_X86_TL2=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+```
