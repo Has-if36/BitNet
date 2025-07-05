@@ -369,6 +369,7 @@ For this one, I did for Vulkan, following based on their [Doc](https://github.co
 -DGGML_VULKAN=ON
 ```
 There are some changes need to be done (otherwise it will crash/abort when running with GPU) with shady workaround.
+In `ggml/ggml.c`
 ```
 GGML_ASSERT(view_src == NULL || data_size == 0 || data_size + view_offs <= ggml_nbytes(view_src));
 ```
