@@ -351,15 +351,83 @@ These steps will initialize your environment and allow you to use the correct Vi
 
 ### Fixing Build Issue
 
-#### Build Generator
+#### Build Generator (Windows)
 
 In setup_env.py, Since these options are required ("-T ClangCL" for Windows)
 ```
 -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 ```
-Some generator does not do well during configuration (for my case, `Visual Studio 17 2022` because ClangCL does not complement well with C and CXX Compiler. And also the need of use for gcc for this build). So use something like `NMake Makefiles` (Closest to VS) or `Ninja`
+Some generator does not do well during configuration (in my case, `Visual Studio 17 2022`, somehow got issues where it doesn't seem able to find compiler with ClangCL although I have them). So use other generator that works for you like `NMake Makefiles` (Closest to VS) or `Ninja`
 ```
 cmake -B build -G "Ninja" -DBITNET_X86_TL2=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+```
+```
+Generators
+* Visual Studio 17 2022        = Generates Visual Studio 2022 project files.
+                                 Use -A option to specify architecture.
+  Visual Studio 16 2019        = Generates Visual Studio 2019 project files.
+                                 Use -A option to specify architecture.
+  Visual Studio 15 2017 [arch] = Generates Visual Studio 2017 project files.
+                                 Optional [arch] can be "Win64" or "ARM".
+  Visual Studio 14 2015 [arch] = Generates Visual Studio 2015 project files.
+                                 Optional [arch] can be "Win64" or "ARM".
+  Borland Makefiles            = Generates Borland makefiles.
+  NMake Makefiles              = Generates NMake makefiles.
+  NMake Makefiles JOM          = Generates JOM makefiles.
+  MSYS Makefiles               = Generates MSYS makefiles.
+  MinGW Makefiles              = Generates a make file for use with
+                                 mingw32-make.
+  Green Hills MULTI            = Generates Green Hills MULTI files
+                                 (experimental, work-in-progress).
+  Unix Makefiles               = Generates standard UNIX makefiles.
+  Ninja                        = Generates build.ninja files.
+  Ninja Multi-Config           = Generates build-<Config>.ninja files.
+  Watcom WMake                 = Generates Watcom WMake makefiles.
+  CodeBlocks - MinGW Makefiles = Generates CodeBlocks project files
+                                 (deprecated).
+  CodeBlocks - NMake Makefiles = Generates CodeBlocks project files
+                                 (deprecated).
+  CodeBlocks - NMake Makefiles JOM
+                               = Generates CodeBlocks project files
+                                 (deprecated).
+  CodeBlocks - Ninja           = Generates CodeBlocks project files
+                                 (deprecated).
+  CodeBlocks - Unix Makefiles  = Generates CodeBlocks project files
+                                 (deprecated).
+  CodeLite - MinGW Makefiles   = Generates CodeLite project files
+                                 (deprecated).
+  CodeLite - NMake Makefiles   = Generates CodeLite project files
+                                 (deprecated).
+  CodeLite - Ninja             = Generates CodeLite project files
+                                 (deprecated).
+  CodeLite - Unix Makefiles    = Generates CodeLite project files
+                                 (deprecated).
+  Eclipse CDT4 - NMake Makefiles
+                               = Generates Eclipse CDT 4.0 project files
+                                 (deprecated).
+  Eclipse CDT4 - MinGW Makefiles
+                               = Generates Eclipse CDT 4.0 project files
+                                 (deprecated).
+  Eclipse CDT4 - Ninja         = Generates Eclipse CDT 4.0 project files
+                                 (deprecated).
+  Eclipse CDT4 - Unix Makefiles= Generates Eclipse CDT 4.0 project files
+                                 (deprecated).
+  Kate - MinGW Makefiles       = Generates Kate project files (deprecated).
+  Kate - NMake Makefiles       = Generates Kate project files (deprecated).
+  Kate - Ninja                 = Generates Kate project files (deprecated).
+  Kate - Ninja Multi-Config    = Generates Kate project files (deprecated).
+  Kate - Unix Makefiles        = Generates Kate project files (deprecated).
+  Sublime Text 2 - MinGW Makefiles
+                               = Generates Sublime Text 2 project files
+                                 (deprecated).
+  Sublime Text 2 - NMake Makefiles
+                               = Generates Sublime Text 2 project files
+                                 (deprecated).
+  Sublime Text 2 - Ninja       = Generates Sublime Text 2 project files
+                                 (deprecated).
+  Sublime Text 2 - Unix Makefiles
+                               = Generates Sublime Text 2 project files
+                                 (deprecated).
 ```
 
 #### Build for GPU Support (Vulkan)
@@ -387,7 +455,7 @@ Replace with
     GGML_ASSERT(view_src == NULL || data_size == 0 || data_size + view_offs <= ggml_nbytes(view_src));
 #endif
 ```
-This will pretty much clamp the required allocation down to what's available instead of crashing. So far I've only tested with `bitnet-b1.58-2B-4T`, it's slower than CPU (at least from what I see, not sure why. It might be because of this, who knows. According to ChatGPT, it might be because of the overhead in transfering data between CPU to GPU, so larger model is suitable). `-ngl` will enable gpu support, if set 0, CPU will be used.
+This will pretty much clamp the required allocation down to what's available instead of crashing. So far I've only tested with `bitnet-b1.58-2B-4T`, it's slower than CPU (at least from what I see, not sure why. It might be because of this, or maybe because I'm using smaller model). `-ngl` will enable gpu support, if set 0, CPU will be used.
 ```
 "./build/bin/llama-cli.exe" -m models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf -p "You are a helpful assistant" -cnv -ngl 31 -t 4
 ```
